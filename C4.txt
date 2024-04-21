@@ -1,0 +1,82 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+namespace ConsoleApplication6
+{
+    class Program
+    {
+        // تعريف أنواع الرموز المختلفة وتعبيرات القواعد النمطية لكل نوع
+        static readonly Tuple<string, string>[] tokenTypes = {
+            Tuple.Create("IDENTIFIER", @"[a-zA-Z_]\w*"),             // تعريف المعرفات
+            Tuple.Create("NUMBER", @"\d+(\.\d+)?"),                 // تعريف الأرقام
+            Tuple.Create("OPERATOR", @"[+\-*^/]"),                   // تعريف العمليات الحسابية
+            Tuple.Create("ASSIGN", @"="),                            // تعريف علامة التعيين
+            Tuple.Create("SPECIAL_CHAR", @"[/?><.,';\|}{_)(&%$#@!~`]") // تعريف الرموز الخاصة
+        };
+
+        // وظيفة لتقسيم النص إلى توكنات
+        static List<Tuple<string, string>> Tokenize(string code)
+        {
+            List<Tuple<string, string>> tokens = new List<Tuple<string, string>>();
+
+            // التفاضل بين الكلمات والرموز
+            var words = Regex.Split(code, @"(\b)");
+            foreach (var word in words)
+            {
+                if (!string.IsNullOrWhiteSpace(word))
+                {
+                    if (word.Any(char.IsDigit) && word.Any(char.IsLetter))
+                    {
+                        // فصل الأسماء المدمجة مع الأرقام إلى جزئين (Identifier و Number)
+                        string identifierPart = string.Join("", word.Where(char.IsLetter));
+                        string numberPart = string.Join("", word.Where(char.IsDigit));
+                        tokens.Add(Tuple.Create("IDENTIFIER", identifierPart));
+                        tokens.Add(Tuple.Create("NUMBER", numberPart));
+                    }
+                    else
+                    {
+                        // تقسيم الكلمات الأخرى إلى توكنات حسب النوع المحدد
+                        foreach (var tt in tokenTypes)
+                        {
+                            var matches = Regex.Matches(word, tt.Item2);
+                            foreach (Match m in matches)
+                            {
+                                var value = m.Value;
+                                foreach (char c in value)
+                                {
+                                    tokens.Add(Tuple.Create(tt.Item1, c.ToString()));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return tokens;
+        }
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Enter the code to tokenize:");
+            var code = Console.ReadLine();
+
+            try
+            {
+                // استدعاء الوظيفة لتقسيم النص إلى توكنات
+                var tokens = Tokenize(code);
+
+                // طباعة التوكنات
+                foreach (var t in tokens)
+                {
+                    Console.WriteLine(String.Format("({0}, {1})", t.Item1, t.Item2));
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+            Console.ReadKey();
+        }
+    }
+}

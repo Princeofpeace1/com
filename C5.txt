@@ -1,0 +1,66 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+class Compiler
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Enter a sentence:");
+        string sentence = Console.ReadLine();
+
+        List<string> numbers = new List<string>();
+        List<string> words = new List<string>();
+        List<string> operators = new List<string>();
+        List<string> punctuations = new List<string>();
+
+        string[] tokens = Regex.Split(sentence, @"(\s+|(?=[^\w\s])|(?<=[^\w\s]))");
+        foreach (string token in tokens)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                continue;
+
+            if (IsNumber(token))
+                numbers.Add(token);
+            else if (IsOperator(token))
+                operators.Add(token);
+            else if (IsWord(token))
+                words.Add(token);
+            else
+                punctuations.Add(token);
+        }
+
+        Console.WriteLine("Numbers:");
+        numbers.ForEach(Console.WriteLine);
+        Console.WriteLine();
+
+        Console.WriteLine("Words:");
+        words.ForEach(Console.WriteLine);
+        Console.WriteLine();
+
+        Console.WriteLine("Operators:");
+        operators.ForEach(Console.WriteLine);
+        Console.WriteLine();
+
+        Console.WriteLine("Punctuations:");
+        punctuations.ForEach(Console.WriteLine);
+        Console.WriteLine();
+        Console.ReadKey();
+    }
+
+    static bool IsNumber(string token)
+    {
+        return Regex.IsMatch(token, @"^\d+$");
+    }
+
+    static bool IsOperator(string token)
+    {
+        return Regex.IsMatch(token, @"^[+\-*\/]$");
+    }
+
+    static bool IsWord(string token)
+    {
+        return Regex.IsMatch(token, @"^\w+$");
+    }
+}
